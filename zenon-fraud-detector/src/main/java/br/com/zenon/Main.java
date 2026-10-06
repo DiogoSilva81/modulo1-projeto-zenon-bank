@@ -22,9 +22,11 @@ public class Main {
 */
 
         TransctionIngestor t1 = new TransctionIngestor();
-        t1.setArquivo("C:\\Java\\POS\\FundamentosJava\\modulo1-projeto-zenon-bank\\zenon-fraud-detector\\data\\PS_20174392719_1491204439457_log.csv");
+        //t1.setArquivo("C:\\Java\\POS\\FundamentosJava\\modulo1-projeto-zenon-bank\\zenon-fraud-detector\\data\\PS_20174392719_1491204439457_log.csv");
+        t1.setArquivo("C:\\Java\\POS\\FundamentosJava\\modulo1-projeto-zenon-bank\\zenon-fraud-detector\\data\\dados.csv");
         List<Transaction> list = t1.transctions();
-        list.stream().limit(2710).forEach(System.out::println);
+        IO.println(list.size());
+        list.stream().limit(10).forEach(IO::println);
     }
 
 }
