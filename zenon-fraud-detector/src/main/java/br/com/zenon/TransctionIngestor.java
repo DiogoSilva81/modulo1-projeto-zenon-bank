@@ -17,29 +17,37 @@ import static br.com.zenon.TransactionType.PAYMENT;
 public class TransctionIngestor {
 
     private String arquivo;
+    private int limite;
+    private Integer nCount = 0;
 
     public String getArquivo() {return arquivo;}
     public void setArquivo(String arquivo) {this.arquivo = arquivo;}
+    public int getLimite() {
+        return limite;
+    }
+    public void setLimite(int limite) {
+        this.limite = limite;
+    }
 
     public List<Transaction> transctions(){
         Path path = Path.of(getArquivo());
         try(Stream<String> linhas = Files.lines(path)){
-             List<Transaction> trans = linhas
-                     // Filter and map lines to transactions
-                     .skip(1)
-                     .map(TransctionIngestor::criarItem).filter(Objects::nonNull)
-                     .filter(Optional::isPresent)
-                     .map(Optional::get)
-                     .toList();
-
+            List<Transaction> trans = linhas
+                    .skip(1)
+                    .limit(getLimite())
+                    .map(this::criarItem)
+                    .flatMap(Optional::stream)
+                    .toList();
              return trans;
         }catch (IOException e){
-            throw new RuntimeException(e);
+            System.err.println("Erro ao ler arquivo: " + e.getMessage());
+            return null;
         }
-
     }
 
-    private static Optional<Transaction> criarItem(String linha){
+    private Optional<Transaction> criarItem(String linha){
+        this.nCount ++;
+        boolean fraude = new Boolean( this.nCount % 2 == 0);
         try{
             String[] campos = linha.split(",");
             Transaction t = new Transaction(
@@ -49,7 +57,8 @@ public class TransctionIngestor {
                    new TransactionCustumer(campos[3], new BigDecimal(campos[4]), new BigDecimal(campos[5])),
                    new TransactionCustumer(campos[6], new BigDecimal(campos[7]), new BigDecimal(campos[8])),
                    Boolean.parseBoolean(campos[9]),
-                   Boolean.parseBoolean(campos[10]));
+                   //Boolean.parseBoolean(campos[10]));
+                   fraude);
             return Optional.of(t);
         }catch (Exception e){
             System.err.println("Erro ao criar item: " + linha + " - " + e.getMessage());
